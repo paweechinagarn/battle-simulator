@@ -32,6 +32,9 @@ namespace BattleSimulator
             var entity = SystemAPI.GetSingletonEntity<GameState>();
             var gameState = SystemAPI.GetSingleton<GameState>();
 
+            if (gameState.Value == newGameState)
+                return;
+
             var commandBufferSystem = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
             var commandBuffer = commandBufferSystem.CreateCommandBuffer(World.Unmanaged);
 
