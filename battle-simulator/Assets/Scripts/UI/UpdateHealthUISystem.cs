@@ -9,12 +9,16 @@ namespace BattleSimulator
     {
         private static readonly float3 offsetPosition = new float3(0f, 2.75f, 0f);
 
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<InGameStateTag>();
+        }
+
         protected override void OnStartRunning()
         {
             foreach (var (uiComponent, entity) in SystemAPI.Query<HealthUIComponentData>().WithEntityAccess())
             {
                 uiComponent.HealthUI = HealthUIPool.Pool.Get();
-                UnityEngine.Debug.Log($"{entity} gets the ui", uiComponent.HealthUI);
             }
         }
 

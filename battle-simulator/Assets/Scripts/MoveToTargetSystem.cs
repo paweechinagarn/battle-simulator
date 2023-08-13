@@ -6,6 +6,11 @@ namespace BattleSimulator
 {
     public partial struct MoveToTargetSystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<InGameStateTag>();
+        }
+
         public void OnUpdate(ref SystemState state)
         {
             foreach (var (targetData, transform, movementSpeed, attack) in SystemAPI.Query<RefRW<TargetData>, RefRW<LocalTransform>, RefRO<MovementSpeed>, RefRO<Attack>>())

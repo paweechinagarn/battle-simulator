@@ -8,6 +8,11 @@ namespace BattleSimulator
     {
         private int index;
 
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<InGameStateTag>();
+        }
+
         public void OnUpdate(ref SystemState state)
         {
             var commandBufferSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();

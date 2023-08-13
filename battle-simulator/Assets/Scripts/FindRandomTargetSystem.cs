@@ -7,6 +7,11 @@ namespace BattleSimulator
     public partial struct FindRandomTargetSystem : ISystem
     {
         private uint randomIndex;
+        
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<InGameStateTag>();
+        }
 
         public void OnUpdate(ref SystemState state)
         {
@@ -34,7 +39,6 @@ namespace BattleSimulator
 
                 var index = random.NextInt(0, length);
                 targetData.ValueRW.Target = entities[index];
-                UnityEngine.Debug.Log($"{entity} get new target {targetData.ValueRO.Target}");
             }
         }
     }
