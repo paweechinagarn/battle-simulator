@@ -9,18 +9,18 @@ namespace BattleSimulator
         {
             public override void Bake(SpawnerAuthoring authoring)
             {
-                var entity = GetEntity(TransformUsageFlags.None);
+                var entity = GetEntity(authoring, TransformUsageFlags.None);
                 var component = new Spawner
                 {
                     Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.None),
-                    Amount = authoring.Amount
+                    PlayerConfig = authoring.Config
                 };
 
-                AddComponent(entity, component);
+                AddComponentObject(entity, component);
             }
         }
 
         public GameObject Prefab;
-        public int Amount;
+        public SpawnScriptableObject Config;
     }
 }
