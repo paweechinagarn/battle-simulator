@@ -15,16 +15,16 @@ namespace BattleSimulator
 
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (targetData, team, entity) in SystemAPI.Query<RefRW<TargetData>, RefRO<Team>>().WithEntityAccess())
+            foreach (var (targetData, player, entity) in SystemAPI.Query<RefRW<TargetData>, RefRO<Player>>().WithEntityAccess())
             {
                 if (targetData.ValueRO.Target != Entity.Null && SystemAPI.Exists(targetData.ValueRO.Target))
                     continue;
 
-                var query = team.ValueRO.Id switch
+                var query = player.ValueRO.Id switch
                 {
-                    1 => SystemAPI.QueryBuilder().WithAll<Team>().WithAbsent<Team1Tag>().Build(),
-                    2 => SystemAPI.QueryBuilder().WithAll<Team>().WithAbsent<Team2Tag>().Build(),
-                    _ => throw new System.NotSupportedException($"Team id {team.ValueRO.Id} is not currently supported. [{entity}]"),
+                    1 => SystemAPI.QueryBuilder().WithAll<Player>().WithAbsent<Player1Tag>().Build(),
+                    2 => SystemAPI.QueryBuilder().WithAll<Player>().WithAbsent<Player2Tag>().Build(),
+                    _ => throw new System.NotSupportedException($"Player id {player.ValueRO.Id} is not currently supported. [{entity}]"),
                 };
 
                 var entities = query.ToEntityArray(Allocator.Temp);

@@ -90,12 +90,30 @@ namespace BattleSimulator
                         Range = unitData.AttackRange
                     });
 
-                    commandBuffer.SetComponent(i, instance, new Team
+                    // In case of new unit
+                    if (unitBuffer.Length <= i)
                     {
-                        Id = spawner.PlayerId
-                    });
+                        commandBuffer.SetComponent(i, instance, new Player
+                        {
+                            Id = spawner.PlayerId
+                        });
 
-                    if (unitBuffer.Length <= i) commandBuffer.AppendToBuffer(i, entity, new UnitBuffer { Value = instance });
+                        switch (spawner.PlayerId)
+                        {
+                            case 1:
+                                commandBuffer.AddComponent(i, instance, new Player1Tag());
+                                commandBuffer.RemoveComponent<Player2Tag>(i, instance);
+                                break;
+                            case 2:
+                                commandBuffer.RemoveComponent<Player1Tag>(i, instance);
+                                commandBuffer.AddComponent(i, instance, new Player2Tag());
+                                break;
+                            default:
+                                throw new System.NotSupportedException($"Team id {spawner.PlayerId} is not currently supported. [{entity}]");
+                        }
+
+                        commandBuffer.AppendToBuffer(i, entity, new UnitBuffer { Value = instance });
+                    }
                 }
 
                 if (unitBuffer.Length > team.Units.Length)

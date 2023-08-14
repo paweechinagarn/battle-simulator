@@ -3,23 +3,23 @@ using UnityEngine;
 
 namespace BattleSimulator
 {
-    public class TeamAuthoring : MonoBehaviour
+    public class PlayerAuthoring : MonoBehaviour
     {
-        private class Baker : Baker<TeamAuthoring>
+        private class Baker : Baker<PlayerAuthoring>
         {
-            public override void Bake(TeamAuthoring authoring)
+            public override void Bake(PlayerAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
-                AddComponent(entity, new Team { Id = authoring.Id });
+                AddComponent(entity, new Player { Id = authoring.Id });
 
                 switch (authoring.Id)
                 {
                     case 1:
-                        AddComponent(entity, new Team1Tag());
+                        AddComponent(entity, new Player1Tag());
                         break;
                     case 2:
-                        AddComponent(entity, new Team2Tag());
+                        AddComponent(entity, new Player2Tag());
                         break;
                     default:
                         throw new System.NotSupportedException($"Team id {authoring.Id} is not currently supported. [{entity}]");
