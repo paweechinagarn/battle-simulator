@@ -2,11 +2,12 @@
 
 namespace BattleSimulator
 {
-    public class Spawner : IComponentData, IEnableableComponent
+    public class Spawner : IComponentData
     {
         public Entity Prefab;
-        public SpawnScriptableObject PlayerConfig;
-        public SpawnScriptableObject EnemyConfig;
-        public int EnemyTeamId;
+        public int PlayerId;
+        public int TeamId;
+        public SpawnScriptableObject Config;
+        public bool NeedsUpdate;
     }
 }

@@ -13,14 +13,19 @@ namespace BattleSimulator
                 var component = new Spawner
                 {
                     Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.None),
-                    PlayerConfig = authoring.Config
+                    PlayerId = authoring.PlayerId,
+                    TeamId = authoring.TeamId,
+                    Config = authoring.Config,
                 };
 
                 AddComponentObject(entity, component);
+                AddBuffer<UnitBuffer>(entity);
             }
         }
 
-        public GameObject Prefab;
+        public GameObject Prefab; 
+        public int PlayerId;
+        public int TeamId;
         public SpawnScriptableObject Config;
     }
 }

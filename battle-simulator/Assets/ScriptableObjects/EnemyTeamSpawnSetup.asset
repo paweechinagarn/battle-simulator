@@ -16,76 +16,86 @@ MonoBehaviour:
   - Id: 1
     Name: Team 1
     Units:
-    - Health: 100
+    - Id: 1
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 0
       StartYPosition: 0
-    - Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 2
-      StartYPosition: 0
-    - Health: 100
+    - Id: 2
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 0
-      StartYPosition: 2
-    - Health: 100
+      StartYPosition: 1
+    - Id: 3
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 1
-      StartYPosition: 1
-    - Health: 100
+      StartYPosition: 0
+    - Id: 4
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 2
+      StartYPosition: 1
+    - Id: 5
+      Health: 100
+      AttackDamage: 10
+      AttackSpeed: 1
+      AttackRange: 2.5
+      MovementSpeed: 5
+      StartXPosition: 1
       StartYPosition: 2
   - Id: 2
     Name: Team 2
     Units:
-    - Health: 100
+    - Id: 1
+      Health: 100
+      AttackDamage: 10
+      AttackSpeed: 1
+      AttackRange: 2.5
+      MovementSpeed: 5
+      StartXPosition: 0
+      StartYPosition: 1
+    - Id: 2
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 1
       StartYPosition: 0
-    - Health: 100
+    - Id: 3
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
-      StartXPosition: 2
-      StartYPosition: 0
-    - Health: 100
+      StartXPosition: 1
+      StartYPosition: 2
+    - Id: 4
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 0
       StartYPosition: 2
-    - Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 1
-      StartYPosition: 1
-    - Health: 100
+    - Id: 5
+      Health: 100
       AttackDamage: 10
       AttackSpeed: 1
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 2
-      StartYPosition: 2
+      StartYPosition: 0

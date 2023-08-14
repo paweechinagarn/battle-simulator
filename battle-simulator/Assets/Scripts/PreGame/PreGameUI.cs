@@ -5,13 +5,12 @@ namespace BattleSimulator
 {
     public class PreGameUI : MonoBehaviour
     {
-        [Header("Config")]
-        [SerializeField] private SpawnScriptableObject config;
-
         [Header("Start")]
         [SerializeField] private Button startButton;
 
         [Header("Enemy Team")]
+        [SerializeField] private SpawnScriptableObject config;
+        [SerializeField] private int playerId;
         [SerializeField] private TeamButton teamButtonPrefab;
         [SerializeField] private Transform teamButtonContainer;
 
@@ -31,7 +30,7 @@ namespace BattleSimulator
         public void InitializeEnemyTeamUI(SpawnSetupTeam teamConfig)
         {
             var teamButton = Instantiate(teamButtonPrefab, teamButtonContainer);
-            teamButton.Initialize(teamConfig.Id, teamConfig.Name);
+            teamButton.Initialize(playerId, teamConfig.Id, teamConfig.Name);
         }
 
         private void OnStartButtonClicked()

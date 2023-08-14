@@ -2,6 +2,7 @@
 {
     public struct TeamSelectedEvent : IDomainEvent
     {
-        public int Id;
+        public int PlayerId;
+        public int TeamId;
     }
 }

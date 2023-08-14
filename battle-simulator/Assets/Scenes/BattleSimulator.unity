@@ -1281,8 +1281,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 493a4aa0cda53da41af83d0f7c048402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 245a4718781dd2c4aa6e5a00a0bd0d0c, type: 2}
   startButton: {fileID: 2039577161}
+  config: {fileID: 11400000, guid: 245a4718781dd2c4aa6e5a00a0bd0d0c, type: 2}
+  playerId: 2
   teamButtonPrefab: {fileID: 8937502243056470975, guid: 6c2130bf29ee8f54c840f0af0ccd212b,
     type: 3}
   teamButtonContainer: {fileID: 510804848}

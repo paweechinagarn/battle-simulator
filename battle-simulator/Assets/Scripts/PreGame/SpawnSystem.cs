@@ -1,75 +1,129 @@
-﻿using System.Runtime.InteropServices;
+﻿using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 
 namespace BattleSimulator
 {
-    public partial struct SpawnSystem : ISystem, ISystemStartStop, IDomainEventHandler<TeamSelectedEvent>
+    public partial class SpawnSystem : SystemBase, IDomainEventHandler<TeamSelectedEvent>
     {
-        [StructLayout(LayoutKind.Auto)]
-        private partial struct SpawnJob : IJobEntity
-        {
-            public float DeltaTime;
+        private NativeArray<int> spawnGridArray;
 
-            public void Execute(ref LocalTransform transform, in MovementSpeed movementSpeed)
-            {
-                //var direction = new float3(1f, 0f, 0f);
-                //transform = transform.Translate(direction * movementSpeed.Value * DeltaTime);
-            }
+        protected override void OnCreate()
+        {
+            RequireForUpdate<PreGameStateTag>();
+            RequireForUpdate<Spawner>();
         }
 
-        private bool enabled;
-        private uint index;
-
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<PreGameStateTag>();
-            state.RequireForUpdate<Spawner>();
-            enabled = true;
-        }
-
-        public void OnStartRunning(ref SystemState state)
+        protected override void OnStartRunning()
         {
             DomainEvents.RegisterDomainEventHandler(this);
+
+            foreach (var spawner in SystemAPI.Query<Spawner>())
+            {
+                spawner.NeedsUpdate = true;
+            }
+
+            CreateOrUpdate();
         }
 
-        public void OnStopRunning(ref SystemState state)
+        protected override void OnStopRunning()
         {
             DomainEvents.UnregisterDomainEventHandler(this);
         }
 
-        public void OnUpdate(ref SystemState state)
+        protected override void OnUpdate()
         {
-            if (!enabled)
-                return;
+        }
 
-            enabled = false;
-
+        private void CreateOrUpdate()
+        {
             var commandBufferSystem = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
-            var commandBuffer = commandBufferSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
+            var commandBuffer = commandBufferSystem.CreateCommandBuffer(World.Unmanaged).AsParallelWriter();
 
-            foreach (var spawner in SystemAPI.Query<Spawner>().WithChangeFilter<Spawner>())
+            foreach (var (spawner, unitBuffer, spawnGrid, entity) in 
+                SystemAPI.Query<Spawner, DynamicBuffer<UnitBuffer>, RefRO<SpawnGrid>>()
+                .WithEntityAccess())
             {
-                //var config = spawner.Config;
+                if (!spawner.NeedsUpdate)
+                    continue;
 
-                //for (var i = 0; i < 2; i++)
-                //{
-                //    var instance = commandBuffer.Instantiate(i, spawner.Prefab);
-                //    var random = Random.CreateFromIndex(index++);
+                spawner.NeedsUpdate = false;
 
-                //    commandBuffer.SetComponent(i, instance, LocalTransform.Identity.WithPosition(random.NextInt(-3, 3), 1f, random.NextInt(-3, 3)));
+                var config = spawner.Config;
+                var team = System.Array.Find(config.Teams, team => team.Id == spawner.TeamId);
 
-                //    commandBuffer.SetComponent(i, instance, new MovementSpeed
-                //    {
-                //        Value = random.NextFloat(1f, 5f)
-                //    });
-                //}
+                if (team == null || team.Units.Length == 0)
+                    continue;
+
+                spawnGridArray = new NativeArray<int>(spawnGrid.ValueRO.Width * spawnGrid.ValueRO.Height, Allocator.Temp);
+
+                for (var i = 0; i < team.Units.Length; i++)
+                {
+                    var unitData = team.Units[i];
+
+                    var arrayIndex = unitData.StartYPosition * spawnGrid.ValueRO.Width + unitData.StartXPosition;
+                    if (spawnGridArray[arrayIndex] != 0)
+                    {
+                        UnityEngine.Debug.LogError($"player {spawner.PlayerId} team {spawner.TeamId} unit id {unitData.Id} is placed at the same position with unit id {spawnGridArray[arrayIndex]}");
+                        continue;
+                    }
+
+                    spawnGridArray[arrayIndex] = unitData.Id;
+
+                    var instance = unitBuffer.Length > i
+                        ? unitBuffer[i].Value
+                        : commandBuffer.Instantiate(i, spawner.Prefab);
+
+                    var position = new float3(unitData.StartXPosition, 1f, unitData.StartYPosition);
+                    commandBuffer.SetComponent(i, instance, LocalTransform.Identity.WithPosition(position + spawnGrid.ValueRO.OriginPosition));
+
+                    commandBuffer.SetComponent(i, instance, new MovementSpeed
+                    {
+                        Value = unitData.MovementSpeed
+                    });
+
+                    commandBuffer.SetComponent(i, instance, new Attack
+                    {
+                        Damage = unitData.AttackDamage,
+                        Speed = unitData.AttackSpeed,
+                        Range = unitData.AttackRange
+                    });
+
+                    commandBuffer.SetComponent(i, instance, new Team
+                    {
+                        Id = spawner.PlayerId
+                    });
+
+                    if (unitBuffer.Length <= i) commandBuffer.AppendToBuffer(i, entity, new UnitBuffer { Value = instance });
+                }
+
+                if (unitBuffer.Length > team.Units.Length)
+                {
+                    for (var i = team.Units.Length; i < unitBuffer.Length; i++)
+                    {
+                        commandBuffer.DestroyEntity(i, unitBuffer[i].Value);
+                    }
+                    unitBuffer.RemoveRange(team.Units.Length, unitBuffer.Length - team.Units.Length);
+                }
             }
         }
 
         public void Handle(TeamSelectedEvent evt)
         {
-            UnityEngine.Debug.Log($"Select team {evt.Id}");
+            foreach (var spawner in SystemAPI.Query<Spawner>())
+            {
+                if (spawner.PlayerId != evt.PlayerId)
+                    continue;
+
+                if (spawner.TeamId == evt.TeamId)
+                    continue;
+
+                spawner.TeamId = evt.TeamId;
+                spawner.NeedsUpdate = true;
+            }
+
+            CreateOrUpdate();
         }
     }
 }

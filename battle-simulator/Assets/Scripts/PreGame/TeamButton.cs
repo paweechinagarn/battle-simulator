@@ -9,11 +9,13 @@ namespace BattleSimulator
         [SerializeField] private Button button;
         [SerializeField] private TextMeshProUGUI text;
 
-        private int id;
+        private int playerId;
+        private int teamId;
 
-        public void Initialize(int id, string name)
+        public void Initialize(int playerId, int teamId, string name)
         {
-            this.id = id;
+            this.playerId = playerId;
+            this.teamId = teamId;
             text.text = name;
         }
 
@@ -24,7 +26,11 @@ namespace BattleSimulator
 
         private void OnButtonClicked()
         {
-            DomainEvents.Raise(new TeamSelectedEvent { Id = id });
+            DomainEvents.Raise(new TeamSelectedEvent
+            {
+                PlayerId = playerId,
+                TeamId = teamId 
+            });
         }
     }
 }
