@@ -26,6 +26,6 @@ namespace BattleSimulator
         public GameObject Prefab; 
         public int PlayerId;
         public int TeamId;
-        public SpawnScriptableObject Config;
+        public PlayerSpawnSetup Config;
     }
 }

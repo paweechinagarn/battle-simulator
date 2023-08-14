@@ -7,13 +7,10 @@ namespace BattleSimulator
 {
     public partial class SpawnSystem : SystemBase, IDomainEventHandler<TeamSelectedEvent>
     {
-        private const float gridSize = 2f;
-
-        private NativeArray<int> spawnGridArray;
-
         protected override void OnCreate()
         {
             RequireForUpdate<PreGameStateTag>();
+            RequireForUpdate<SpawnSettings>();
             RequireForUpdate<Spawner>();
         }
 
@@ -43,6 +40,8 @@ namespace BattleSimulator
             var commandBufferSystem = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
             var commandBuffer = commandBufferSystem.CreateCommandBuffer(World.Unmanaged).AsParallelWriter();
 
+            var spawnSettings = SystemAPI.GetSingleton<SpawnSettings>();
+
             foreach (var (spawner, unitBuffer, spawnGrid, spawnerEntity) in 
                 SystemAPI.Query<Spawner, DynamicBuffer<UnitBuffer>, RefRO<SpawnGrid>>()
                 .WithEntityAccess())
@@ -58,7 +57,7 @@ namespace BattleSimulator
                 if (team == null || team.Units.Length == 0)
                     continue;
 
-                spawnGridArray = new NativeArray<int>(spawnGrid.ValueRO.Width * spawnGrid.ValueRO.Height, Allocator.Temp);
+                var spawnGridArray = new NativeArray<int>(spawnGrid.ValueRO.Width * spawnGrid.ValueRO.Height, Allocator.Temp);
 
                 for (var i = 0; i < team.Units.Length; i++)
                 {
@@ -85,7 +84,7 @@ namespace BattleSimulator
                         ? unitBuffer[i].Value
                         : commandBuffer.Instantiate(i, spawner.Prefab);
 
-                    var position = new float3(unitData.StartXPosition * gridSize, 1f, unitData.StartYPosition * gridSize);
+                    var position = new float3(unitData.StartXPosition * spawnSettings.GridSize, 1f, unitData.StartYPosition * spawnSettings.GridSize);
                     commandBuffer.SetComponent(i, instance, LocalTransform.Identity.WithPosition(position + spawnGrid.ValueRO.OriginPosition));
 
                     commandBuffer.SetComponent(i, instance, new Health

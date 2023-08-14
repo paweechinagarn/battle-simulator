@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44ceddecba0144e4d98020c9935742b9, type: 3}
-  m_Name: EnemyTeamSpawnSetup
+  m_Name: PlayerSpawnSetup
   m_EditorClassIdentifier: 
   Teams:
   - Id: 1
@@ -31,67 +31,8 @@ MonoBehaviour:
       AttackRange: 2.5
       MovementSpeed: 5
       StartXPosition: 0
-      StartYPosition: 1
+      StartYPosition: 2
     - Id: 3
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 1
-      StartYPosition: 0
-    - Id: 4
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 2
-      StartYPosition: 1
-    - Id: 5
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 1
-      StartYPosition: 2
-  - Id: 2
-    Name: Team 2
-    Units:
-    - Id: 1
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 0
-      StartYPosition: 1
-    - Id: 2
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 1
-      StartYPosition: 0
-    - Id: 3
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 1
-      StartYPosition: 2
-    - Id: 4
-      Health: 100
-      AttackDamage: 10
-      AttackSpeed: 1
-      AttackRange: 2.5
-      MovementSpeed: 5
-      StartXPosition: 0
-      StartYPosition: 2
-    - Id: 5
       Health: 100
       AttackDamage: 10
       AttackSpeed: 1
@@ -99,3 +40,19 @@ MonoBehaviour:
       MovementSpeed: 5
       StartXPosition: 2
       StartYPosition: 0
+    - Id: 4
+      Health: 100
+      AttackDamage: 10
+      AttackSpeed: 1
+      AttackRange: 2.5
+      MovementSpeed: 5
+      StartXPosition: 1
+      StartYPosition: 1
+    - Id: 5
+      Health: 100
+      AttackDamage: 10
+      AttackSpeed: 1
+      AttackRange: 2.5
+      MovementSpeed: 5
+      StartXPosition: 2
+      StartYPosition: 2

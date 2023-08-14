@@ -9,7 +9,7 @@ namespace BattleSimulator
         [SerializeField] private Button startButton;
 
         [Header("Enemy Team")]
-        [SerializeField] private SpawnScriptableObject config;
+        [SerializeField] private PlayerSpawnSetup config;
         [SerializeField] private int playerId;
         [SerializeField] private TeamButton teamButtonPrefab;
         [SerializeField] private Transform teamButtonContainer;

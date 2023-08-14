@@ -7,7 +7,8 @@ namespace BattleSimulator
         public Entity Prefab;
         public int PlayerId;
         public int TeamId;
-        public SpawnScriptableObject Config;
-        public bool NeedsUpdate;
+        public PlayerSpawnSetup Config;
+        
+        public bool NeedsUpdate { get; set; }
     }
 }
