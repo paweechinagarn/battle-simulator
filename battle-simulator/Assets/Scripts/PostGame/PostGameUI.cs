@@ -29,6 +29,7 @@ namespace BattleSimulator
         private void GoToMainMenu()
         {
             DomainEvents.Raise(new PreGameRequestEvent());
+            gameObject.SetActive(false);
         }
 
         public void Handle(GameEndedEvent evt)

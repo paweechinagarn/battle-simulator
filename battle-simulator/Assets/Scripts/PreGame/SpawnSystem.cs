@@ -41,7 +41,7 @@ namespace BattleSimulator
             var commandBufferSystem = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
             var commandBuffer = commandBufferSystem.CreateCommandBuffer(World.Unmanaged).AsParallelWriter();
 
-            foreach (var (spawner, unitBuffer, spawnGrid, entity) in 
+            foreach (var (spawner, unitBuffer, spawnGrid, spawnerEntity) in 
                 SystemAPI.Query<Spawner, DynamicBuffer<UnitBuffer>, RefRO<SpawnGrid>>()
                 .WithEntityAccess())
             {
@@ -78,6 +78,12 @@ namespace BattleSimulator
                     var position = new float3(unitData.StartXPosition, 1f, unitData.StartYPosition);
                     commandBuffer.SetComponent(i, instance, LocalTransform.Identity.WithPosition(position + spawnGrid.ValueRO.OriginPosition));
 
+                    commandBuffer.SetComponent(i, instance, new Health
+                    {
+                        MaxValue = unitData.Health,
+                        Value = unitData.Health
+                    });
+
                     commandBuffer.SetComponent(i, instance, new MovementSpeed
                     {
                         Value = unitData.MovementSpeed
@@ -109,10 +115,15 @@ namespace BattleSimulator
                                 commandBuffer.AddComponent(i, instance, new Player2Tag());
                                 break;
                             default:
-                                throw new System.NotSupportedException($"Team id {spawner.PlayerId} is not currently supported. [{entity}]");
+                                throw new System.NotSupportedException($"Team id {spawner.PlayerId} is not currently supported. [{spawnerEntity}]");
                         }
 
-                        commandBuffer.AppendToBuffer(i, entity, new UnitBuffer { Value = instance });
+                        commandBuffer.AddComponent(i, instance, new Owner
+                        {
+                            Value = spawnerEntity
+                        });
+
+                        commandBuffer.AppendToBuffer(i, spawnerEntity, new UnitBuffer { Value = instance });
                     }
                 }
 

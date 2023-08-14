@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 using Unity.Mathematics;
 
 namespace BattleSimulator
@@ -26,6 +27,15 @@ namespace BattleSimulator
                     if (health.ValueRO.Value == 0)
                     {
                         UnityEngine.Debug.Log($"{entity} dies.");
+
+                        if (SystemAPI.HasComponent<Owner>(entity))
+                        {
+                            var owner = SystemAPI.GetComponent<Owner>(entity);
+                            var unitBuffer = SystemAPI.GetBuffer<UnitBuffer>(owner.Value);
+                            var index = FindUnitIndex(unitBuffer, entity);
+                            unitBuffer.RemoveAt(index);
+                        }
+
                         commandBuffer.DestroyEntity(index++, entity);
 
                         var linkEntityGroupBuffer = SystemAPI.GetBuffer<LinkedEntityGroup>(entity);
@@ -38,6 +48,17 @@ namespace BattleSimulator
                 }
                 damageBuffer.Clear();
             }
+        }
+
+        private int FindUnitIndex(in DynamicBuffer<UnitBuffer> unitBuffer, in Entity entity)
+        {
+            for (var i = 0; i < unitBuffer.Length; i++)
+            {
+                if (unitBuffer[i].Value == entity)
+                    return i;
+            }
+
+            throw new InvalidOperationException("Entity is not in unit buffer.");
         }
     }
 }
