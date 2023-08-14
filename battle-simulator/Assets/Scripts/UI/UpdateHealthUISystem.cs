@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -11,7 +12,10 @@ namespace BattleSimulator
 
         protected override void OnCreate()
         {
-            RequireForUpdate<PreGameStateTag>();
+            var entityQuery = new EntityQueryBuilder(Allocator.Temp)
+                .WithAny<PreGameStateTag, InGameStateTag>()
+                .Build(this);
+            RequireAnyForUpdate(entityQuery);
         }
 
         protected override void OnUpdate()
