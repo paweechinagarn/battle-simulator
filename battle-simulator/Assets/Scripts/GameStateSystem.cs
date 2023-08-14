@@ -3,7 +3,9 @@
 namespace BattleSimulator
 {
     [UpdateInGroup(typeof(InitializationSystemGroup))]
-    public partial class GameStateSystem : SystemBase, IDomainEventHandler<GameStartedEvent>
+    public partial class GameStateSystem : SystemBase, 
+        IDomainEventHandler<StartGameRequestEvent>,
+        IDomainEventHandler<PreGameRequestEvent>
     {
         protected override void OnCreate()
         {
@@ -28,25 +30,26 @@ namespace BattleSimulator
             var gameState = SystemAPI.GetSingleton<GameState>();
             if (gameState.Value == GameState.State.InGame)
             {
-                if (CheckGameEnds())
+                var player1EntityQuery = SystemAPI.QueryBuilder()
+                    .WithAll<Player1Tag>()
+                    .Build();
+
+                var player2EntityQuery = SystemAPI.QueryBuilder()
+                    .WithAll<Player2Tag>()
+                    .Build();
+
+                if (player1EntityQuery.IsEmpty || player2EntityQuery.IsEmpty)
                 {
                     UnityEngine.Debug.Log($"Game ends.");
                     ChangeGameState(GameState.State.PostGame, false);
+
+                    var isWon = !player1EntityQuery.IsEmpty && player2EntityQuery.IsEmpty;
+                    DomainEvents.Raise(new GameEndedEvent
+                    {
+                        IsWon = isWon
+                    });
                 }
             }
-        }
-
-        private bool CheckGameEnds()
-        {
-            var player1EntityQuery = SystemAPI.QueryBuilder()
-                .WithAll<Player1Tag>()
-                .Build();
-
-            var player2EntityQuery = SystemAPI.QueryBuilder()
-                .WithAll<Player2Tag>()
-                .Build();
-
-            return player1EntityQuery.IsEmpty || player2EntityQuery.IsEmpty;
         }
 
         private void ChangeGameState(GameState.State newGameState, bool forceUpdate)
@@ -82,9 +85,15 @@ namespace BattleSimulator
             commandBuffer.SetComponent(entity, new GameState { Value = newGameState });
         }
 
-        public void Handle(GameStartedEvent evt)
+        public void Handle(StartGameRequestEvent evt)
         {
             ChangeGameState(GameState.State.InGame, false);
+        }
+
+        public void Handle(PreGameRequestEvent evt)
+        {
+            ChangeGameState(GameState.State.PreGame, false);
+            DomainEvents.Raise(new PreGameEvent());
         }
     }
 }

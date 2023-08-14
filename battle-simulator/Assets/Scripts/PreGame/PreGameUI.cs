@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace BattleSimulator
 {
-    public class PreGameUI : MonoBehaviour
+    public class PreGameUI : MonoBehaviour, IDomainEventHandler<PreGameEvent>
     {
         [Header("Start")]
         [SerializeField] private Button startButton;
@@ -16,6 +16,7 @@ namespace BattleSimulator
 
         private void Awake()
         {
+            DomainEvents.RegisterDomainEventHandler(this);
             startButton.onClick.AddListener(OnStartButtonClicked);
         }
 
@@ -27,6 +28,11 @@ namespace BattleSimulator
             }
         }
 
+        private void OnDestroy()
+        {
+            DomainEvents.UnregisterDomainEventHandler(this);
+        }
+
         public void InitializeEnemyTeamUI(SpawnSetupTeam teamConfig)
         {
             var teamButton = Instantiate(teamButtonPrefab, teamButtonContainer);
@@ -35,8 +41,13 @@ namespace BattleSimulator
 
         private void OnStartButtonClicked()
         {
-            DomainEvents.Raise(new GameStartedEvent());
+            DomainEvents.Raise(new StartGameRequestEvent());
             gameObject.SetActive(false);
+        }
+
+        public void Handle(PreGameEvent evt)
+        {
+            gameObject.SetActive(true);
         }
     }
 }
