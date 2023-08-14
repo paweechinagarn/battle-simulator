@@ -20,10 +20,10 @@ namespace BattleSimulator
 
             foreach (var (target, transform, attack) in SystemAPI.Query<RefRO<Target>, RefRO<LocalTransform>, RefRW<Attack>>())
             {
-                if (target.ValueRO.Value == Entity.Null || !SystemAPI.Exists(target.ValueRO.Value))
+                if (target.ValueRO.Entity == Entity.Null || !SystemAPI.Exists(target.ValueRO.Entity))
                     continue;
 
-                var targetTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.Value);
+                var targetTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.Entity);
 
                 var sqrDistance = math.distancesq(transform.ValueRO.Position, targetTransform.Position);
                 if (sqrDistance > attack.ValueRO.Range * attack.ValueRO.Range)
@@ -41,7 +41,7 @@ namespace BattleSimulator
                 attack.ValueRW.CooldownTimer = 0f;
 
                 var damage = new DamageBuffer { Value = attack.ValueRO.Damage };
-                commandBuffer.AppendToBuffer(sortKey++, target.ValueRO.Value, damage);
+                commandBuffer.AppendToBuffer(sortKey++, target.ValueRO.Entity, damage);
             }
         }
     }

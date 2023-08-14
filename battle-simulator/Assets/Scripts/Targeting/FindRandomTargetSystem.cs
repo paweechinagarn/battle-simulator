@@ -17,7 +17,7 @@ namespace BattleSimulator
         {
             foreach (var (target, player, entity) in SystemAPI.Query<RefRW<Target>, RefRO<Player>>().WithEntityAccess())
             {
-                if (target.ValueRO.Value != Entity.Null && SystemAPI.Exists(target.ValueRO.Value))
+                if (target.ValueRO.Entity != Entity.Null && SystemAPI.Exists(target.ValueRO.Entity))
                     continue;
 
                 var query = player.ValueRO.Id switch
@@ -38,7 +38,8 @@ namespace BattleSimulator
                 var random = Random.CreateFromIndex(randomIndex++);
 
                 var index = random.NextInt(0, length);
-                target.ValueRW.Value = entities[index];
+                target.ValueRW.Entity = entities[index];
+                target.ValueRW.Position = SystemAPI.GetComponent<LocalTransform>(entities[index]).Position;
             }
         }
     }
