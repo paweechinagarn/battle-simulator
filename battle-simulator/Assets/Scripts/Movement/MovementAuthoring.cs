@@ -11,15 +11,16 @@ namespace BattleSimulator
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
-                var component = new MovementSpeed
+                var component = new Movement
                 {
-                    Value = authoring.Value
+                    Speed = authoring.Speed
                 };
 
                 AddComponent(entity, component);
             }
         }
 
-        public float Value;
+        [Min(0.1f)]
+        public float Speed;
     }
 }

@@ -94,9 +94,9 @@ namespace BattleSimulator
                         Value = unitData.Health
                     });
 
-                    commandBuffer.SetComponent(i, instance, new MovementSpeed
+                    commandBuffer.SetComponent(i, instance, new Movement
                     {
-                        Value = unitData.MovementSpeed
+                        Speed = unitData.MovementSpeed
                     });
 
                     commandBuffer.SetComponent(i, instance, new Attack

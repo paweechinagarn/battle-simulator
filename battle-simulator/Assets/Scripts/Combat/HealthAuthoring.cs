@@ -22,6 +22,7 @@ namespace BattleSimulator
             }
         }
 
+        [Min(1)]
         public int Value;
     }
 }

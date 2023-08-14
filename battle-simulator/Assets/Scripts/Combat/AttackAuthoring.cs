@@ -22,6 +22,7 @@ namespace BattleSimulator
             }
         }
 
+        [Min(1)]
         public int Damage = 10;
         [Min(0.1f)]
         public float Speed = 1f;

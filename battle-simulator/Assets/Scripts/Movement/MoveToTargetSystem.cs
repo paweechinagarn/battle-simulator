@@ -19,7 +19,7 @@ namespace BattleSimulator
             public float DeltaTime;
 
             [BurstCompile]
-            public void Execute(ref LocalTransform transform, in Target target, in MovementSpeed movementSpeed, in Attack attack)
+            public void Execute(ref LocalTransform transform, in Target target, in Movement movementSpeed, in Attack attack)
             {
                 if (target.Entity == Entity.Null || !EntityStorageInfoLookup.Exists(target.Entity))
                     return;
@@ -31,7 +31,7 @@ namespace BattleSimulator
                 }
 
                 var direction = math.normalize(target.Position - transform.Position);
-                var translation = direction * movementSpeed.Value * DeltaTime;
+                var translation = direction * movementSpeed.Speed * DeltaTime;
                 transform.Position += translation;
             }
         }

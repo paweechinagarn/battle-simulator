@@ -6,8 +6,14 @@ namespace BattleSimulator
 {
     public struct Attack : IComponentData
     {
-        public int Damage;
-        public float CooldownTimer;
+        // Prevent damage to go below 1
+        [Min(1)]
+        [SerializeField] private int damage;
+        public int Damage
+        {
+            get { return damage; }
+            set { damage = math.max(1, value); }
+        }
 
         // Prevent speed to go below 0.1
         [Min(0.1f)]
@@ -27,6 +33,7 @@ namespace BattleSimulator
             set { range = math.max(0.1f, value); }
         }
 
+        public float CooldownTimer { get; set; }
         public float CooldownTime => 1f / Speed;
     }
 }
