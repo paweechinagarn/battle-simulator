@@ -7,6 +7,8 @@ namespace BattleSimulator
 {
     public partial class SpawnSystem : SystemBase, IDomainEventHandler<TeamSelectedEvent>
     {
+        private const float gridSize = 2f;
+
         private NativeArray<int> spawnGridArray;
 
         protected override void OnCreate()
@@ -75,7 +77,7 @@ namespace BattleSimulator
                         ? unitBuffer[i].Value
                         : commandBuffer.Instantiate(i, spawner.Prefab);
 
-                    var position = new float3(unitData.StartXPosition, 1f, unitData.StartYPosition);
+                    var position = new float3(unitData.StartXPosition * gridSize, 1f, unitData.StartYPosition * gridSize);
                     commandBuffer.SetComponent(i, instance, LocalTransform.Identity.WithPosition(position + spawnGrid.ValueRO.OriginPosition));
 
                     commandBuffer.SetComponent(i, instance, new Health

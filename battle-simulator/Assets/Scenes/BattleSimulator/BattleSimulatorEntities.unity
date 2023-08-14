@@ -187,7 +187,7 @@ MonoBehaviour:
   Width: 3
   Height: 3
   OriginPosition:
-    x: -11
+    x: -12
     y: 0
     z: 0
 --- !u!1 &266559448
@@ -299,7 +299,7 @@ MonoBehaviour:
   Width: 3
   Height: 3
   OriginPosition:
-    x: 9
+    x: 8
     y: 0
     z: 0
 --- !u!1660057539 &9223372036854775807
