@@ -12,9 +12,9 @@ namespace BattleSimulator
 
         protected override void OnCreate()
         {
-            var entityQuery = new EntityQueryBuilder(Allocator.Temp)
+            var entityQuery = SystemAPI.QueryBuilder()
                 .WithAny<PreGameStateTag, InGameStateTag>()
-                .Build(this);
+                .Build();
             RequireAnyForUpdate(entityQuery);
         }
 
