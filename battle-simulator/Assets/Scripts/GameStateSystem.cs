@@ -15,7 +15,7 @@ namespace BattleSimulator
             DomainEvents.RegisterDomainEventHandler(this);
 
             var gameState = SystemAPI.GetSingleton<GameState>();
-            ChangeGameState(gameState.Value);
+            ChangeGameState(gameState.Value, true);
         }
 
         protected override void OnStopRunning()
@@ -27,12 +27,12 @@ namespace BattleSimulator
         {
         }
 
-        private void ChangeGameState(GameState.State newGameState)
+        private void ChangeGameState(GameState.State newGameState, bool forceUpdate)
         {
             var entity = SystemAPI.GetSingletonEntity<GameState>();
             var gameState = SystemAPI.GetSingleton<GameState>();
 
-            if (gameState.Value == newGameState)
+            if (gameState.Value == newGameState && !forceUpdate)
                 return;
 
             var commandBufferSystem = SystemAPI.GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>();
@@ -62,7 +62,7 @@ namespace BattleSimulator
 
         public void Handle(GameStartedEvent evt)
         {
-            ChangeGameState(GameState.State.InGame);
+            ChangeGameState(GameState.State.InGame, false);
         }
     }
 }
