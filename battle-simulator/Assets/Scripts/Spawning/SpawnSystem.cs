@@ -64,6 +64,14 @@ namespace BattleSimulator
                 {
                     var unitData = team.Units[i];
 
+                    if (unitData.StartXPosition < 0 ||
+                        unitData.StartYPosition < 0 ||
+                        unitData.StartXPosition >= spawnGrid.ValueRO.Width ||
+                        unitData.StartYPosition >= spawnGrid.ValueRO.Height)
+                    {
+                        UnityEngine.Debug.LogError($"player {spawner.PlayerId} team {spawner.TeamId} unit id {unitData.Id} is placed outside grid at [{unitData.StartXPosition}, {unitData.StartYPosition}]");
+                        continue;
+                    }
                     var arrayIndex = unitData.StartYPosition * spawnGrid.ValueRO.Width + unitData.StartXPosition;
                     if (spawnGridArray[arrayIndex] != 0)
                     {
