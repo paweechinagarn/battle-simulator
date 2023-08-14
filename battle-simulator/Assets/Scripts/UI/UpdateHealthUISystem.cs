@@ -9,9 +9,9 @@ namespace BattleSimulator
     {
         private static readonly float3 offsetPosition = new float3(0f, 2.75f, 0f);
 
-        public void OnCreate(ref SystemState state)
+        protected override void OnCreate()
         {
-            state.RequireForUpdate<InGameStateTag>();
+            RequireForUpdate<InGameStateTag>();
         }
 
         protected override void OnStartRunning()
