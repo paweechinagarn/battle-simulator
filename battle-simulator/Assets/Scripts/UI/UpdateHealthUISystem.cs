@@ -11,21 +11,18 @@ namespace BattleSimulator
 
         protected override void OnCreate()
         {
-            RequireForUpdate<InGameStateTag>();
-        }
-
-        protected override void OnStartRunning()
-        {
-            foreach (var (uiComponent, entity) in SystemAPI.Query<HealthUIComponentData>().WithEntityAccess())
-            {
-                uiComponent.HealthUI = HealthUIPool.Pool.Get();
-            }
+            RequireForUpdate<PreGameStateTag>();
         }
 
         protected override void OnUpdate()
         {
             foreach (var (uiComponent, health, transform, entity) in SystemAPI.Query<HealthUIComponentData, RefRO<Health>, RefRO<LocalTransform>>().WithEntityAccess())
             {
+                if (uiComponent.HealthUI == null)
+                {
+                    uiComponent.HealthUI = HealthUIPool.Pool.Get();
+                }
+
                 if (health.ValueRO.Value > 0)
                 {
                     uiComponent.HealthUI.Health = health.ValueRO.Value;
