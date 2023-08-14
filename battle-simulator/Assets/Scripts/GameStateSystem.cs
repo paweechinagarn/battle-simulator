@@ -25,6 +25,28 @@ namespace BattleSimulator
 
         protected override void OnUpdate()
         {
+            var gameState = SystemAPI.GetSingleton<GameState>();
+            if (gameState.Value == GameState.State.InGame)
+            {
+                if (CheckGameEnds())
+                {
+                    UnityEngine.Debug.Log($"Game ends.");
+                    ChangeGameState(GameState.State.PostGame, false);
+                }
+            }
+        }
+
+        private bool CheckGameEnds()
+        {
+            var player1EntityQuery = SystemAPI.QueryBuilder()
+                .WithAll<Player1Tag>()
+                .Build();
+
+            var player2EntityQuery = SystemAPI.QueryBuilder()
+                .WithAll<Player2Tag>()
+                .Build();
+
+            return player1EntityQuery.IsEmpty || player2EntityQuery.IsEmpty;
         }
 
         private void ChangeGameState(GameState.State newGameState, bool forceUpdate)
@@ -57,7 +79,7 @@ namespace BattleSimulator
                     break;
             }
 
-            gameState.Value = newGameState;
+            commandBuffer.SetComponent(entity, new GameState { Value = newGameState });
         }
 
         public void Handle(GameStartedEvent evt)
