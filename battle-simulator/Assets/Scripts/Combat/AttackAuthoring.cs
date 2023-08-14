@@ -23,7 +23,9 @@ namespace BattleSimulator
         }
 
         public int Damage = 10;
+        [Min(0.1f)]
         public float Speed = 1f;
+        [Min(0.1f)]
         public float Range = 1f;
     }
 }
