@@ -15,9 +15,9 @@ namespace BattleSimulator
 
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (targetData, player, entity) in SystemAPI.Query<RefRW<TargetData>, RefRO<Player>>().WithEntityAccess())
+            foreach (var (target, player, entity) in SystemAPI.Query<RefRW<Target>, RefRO<Player>>().WithEntityAccess())
             {
-                if (targetData.ValueRO.Target != Entity.Null && SystemAPI.Exists(targetData.ValueRO.Target))
+                if (target.ValueRO.Value != Entity.Null && SystemAPI.Exists(target.ValueRO.Value))
                     continue;
 
                 var query = player.ValueRO.Id switch
@@ -38,7 +38,7 @@ namespace BattleSimulator
                 var random = Random.CreateFromIndex(randomIndex++);
 
                 var index = random.NextInt(0, length);
-                targetData.ValueRW.Target = entities[index];
+                target.ValueRW.Value = entities[index];
             }
         }
     }

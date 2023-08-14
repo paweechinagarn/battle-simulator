@@ -13,12 +13,12 @@ namespace BattleSimulator
 
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (targetData, transform, movementSpeed, attack) in SystemAPI.Query<RefRW<TargetData>, RefRW<LocalTransform>, RefRO<MovementSpeed>, RefRO<Attack>>())
+            foreach (var (target, transform, movementSpeed, attack) in SystemAPI.Query<RefRW<Target>, RefRW<LocalTransform>, RefRO<MovementSpeed>, RefRO<Attack>>())
             {
-                if (targetData.ValueRO.Target == Entity.Null || !SystemAPI.Exists(targetData.ValueRO.Target))
+                if (target.ValueRO.Value == Entity.Null || !SystemAPI.Exists(target.ValueRO.Value))
                     continue;
                 
-                var targetTransform = SystemAPI.GetComponent<LocalTransform>(targetData.ValueRO.Target);
+                var targetTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.Value);
                 var sqrDistance = math.distancesq(targetTransform.Position, transform.ValueRO.Position);
                 if (sqrDistance <= attack.ValueRO.Range * attack.ValueRO.Range)
                 {

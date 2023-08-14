@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace BattleSimulator
 {
-    public class TargetDataAuthoring : MonoBehaviour
+    public class TargetAuthoring : MonoBehaviour
     {
-        private class Baker : Baker<TargetDataAuthoring>
+        private class Baker : Baker<TargetAuthoring>
         {
-            public override void Bake(TargetDataAuthoring authoring)
+            public override void Bake(TargetAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
-                var component = new TargetData();
+                var component = new Target();
 
                 AddComponent(entity, component);
             }

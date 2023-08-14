@@ -18,13 +18,12 @@ namespace BattleSimulator
             var commandBufferSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             var commandBuffer = commandBufferSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-            foreach (var (targetData, transform, attack) in SystemAPI.Query<RefRO<TargetData>, RefRO<LocalTransform>, RefRW<Attack>>())
+            foreach (var (target, transform, attack) in SystemAPI.Query<RefRO<Target>, RefRO<LocalTransform>, RefRW<Attack>>())
             {
-                if (targetData.ValueRO.Target == Entity.Null || !SystemAPI.Exists(targetData.ValueRO.Target))
+                if (target.ValueRO.Value == Entity.Null || !SystemAPI.Exists(target.ValueRO.Value))
                     continue;
 
-                var target = targetData.ValueRO.Target;
-                var targetTransform = SystemAPI.GetComponent<LocalTransform>(targetData.ValueRO.Target);
+                var targetTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.Value);
 
                 var sqrDistance = math.distancesq(transform.ValueRO.Position, targetTransform.Position);
                 if (sqrDistance > attack.ValueRO.Range * attack.ValueRO.Range)
@@ -42,7 +41,7 @@ namespace BattleSimulator
                 attack.ValueRW.CooldownTimer = 0f;
 
                 var damage = new DamageBuffer { Value = attack.ValueRO.Damage };
-                commandBuffer.AppendToBuffer(sortKey++, target, damage);
+                commandBuffer.AppendToBuffer(sortKey++, target.ValueRO.Value, damage);
             }
         }
     }
