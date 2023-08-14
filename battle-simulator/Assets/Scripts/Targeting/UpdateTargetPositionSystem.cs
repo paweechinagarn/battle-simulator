@@ -7,6 +7,7 @@ using Unity.Transforms;
 namespace BattleSimulator
 {
     [BurstCompile]
+    [UpdateAfter(typeof(FindRandomTargetSystem))]
     public partial struct UpdateTargetPositionSystem : ISystem
     {
         [BurstCompile]
@@ -54,7 +55,7 @@ namespace BattleSimulator
             job.ScheduleParallel();
         }
 
-        // a main thread version of OnUpdate
+        // a single thread version of OnUpdate
 
         //[BurstCompile]
         //public void OnUpdate(ref SystemState state)

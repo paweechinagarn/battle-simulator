@@ -1,5 +1,4 @@
-﻿using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -20,7 +19,7 @@ namespace BattleSimulator
 
         protected override void OnUpdate()
         {
-            foreach (var (uiComponent, health, transform, entity) in SystemAPI.Query<HealthUIComponentData, RefRO<Health>, RefRO<LocalTransform>>().WithEntityAccess())
+            foreach (var (uiComponent, health, transform) in SystemAPI.Query<HealthUIComponentData, RefRO<Health>, RefRO<LocalTransform>>())
             {
                 if (uiComponent.HealthUI == null)
                 {

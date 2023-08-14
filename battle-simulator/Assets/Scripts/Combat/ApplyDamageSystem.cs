@@ -1,64 +1,94 @@
 ﻿using System;
+using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace BattleSimulator
 {
+    [BurstCompile]
     [UpdateAfter(typeof(AttackSystem))]
     public partial struct ApplyDamageSystem : ISystem
     {
-        private int index;
+        [BurstCompile]
+        [StructLayout(LayoutKind.Auto)]
+        private partial struct ApplyDamageJob : IJobEntity
+        {
+            public EntityCommandBuffer CommandBuffer;
+            [ReadOnly] public ComponentLookup<Owner> OwnerLookup;
+            public BufferLookup<UnitBuffer> UnitBufferLookup;
+            [ReadOnly] public BufferLookup<LinkedEntityGroup> LinkedEntityGroupBufferLookup;
 
+            [BurstCompile]
+            public void Execute(in Entity entity, DynamicBuffer<DamageBuffer> damageBuffer, ref Health health)
+            {
+                foreach (var damage in damageBuffer)
+                {
+                    health.Value = math.max(0, health.Value - damage.Value);
+                    if (health.Value != 0)
+                    {
+                        continue;
+                    }
+                    UnityEngine.Debug.Log($"{entity} dies.");
+
+                    if (OwnerLookup.TryGetComponent(entity, out var owner)
+                        && UnitBufferLookup.TryGetBuffer(owner.Value, out var unitBuffer))
+                    {
+                        var index = FindUnitIndex(unitBuffer, entity);
+                        unitBuffer.RemoveAt(index);
+                    }
+
+                    if (LinkedEntityGroupBufferLookup.TryGetBuffer(entity, out var linkedEntityGroupBuffer))
+                    {
+                        foreach (var linkEntityGroup in linkedEntityGroupBuffer)
+                        {
+                            CommandBuffer.DestroyEntity(linkEntityGroup.Value);
+                        }
+                    }
+
+                    CommandBuffer.DestroyEntity(entity);
+                    break;
+                }
+                damageBuffer.Clear();
+            }
+
+            private static int FindUnitIndex(in DynamicBuffer<UnitBuffer> unitBuffer, in Entity entity)
+            {
+                for (var i = 0; i < unitBuffer.Length; i++)
+                {
+                    if (unitBuffer[i].Value == entity)
+                        return i;
+                }
+
+                throw new InvalidOperationException("Entity is not in unit buffer.");
+            }
+        }
+
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<InGameStateTag>();
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var commandBufferSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-            var commandBuffer = commandBufferSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
+            var commandBuffer = commandBufferSystem.CreateCommandBuffer(state.WorldUnmanaged);
+            var ownerLookup = SystemAPI.GetComponentLookup<Owner>(true);
+            var unitBufferLookup = SystemAPI.GetBufferLookup<UnitBuffer>(false);
+            var linkedEntityGroupBufferLookup = SystemAPI.GetBufferLookup<LinkedEntityGroup>(true);
 
-            foreach (var (damageBuffer, health, entity) in SystemAPI.Query<DynamicBuffer<DamageBuffer>, RefRW<Health>>().WithEntityAccess())
+            var job = new ApplyDamageJob
             {
-                foreach (var damage in damageBuffer)
-                {
-                    health.ValueRW.Value = math.max(0, health.ValueRO.Value - damage.Value);
-                    if (health.ValueRO.Value == 0)
-                    {
-                        UnityEngine.Debug.Log($"{entity} dies.");
+                CommandBuffer = commandBuffer,
+                OwnerLookup = ownerLookup,
+                UnitBufferLookup = unitBufferLookup,
+                LinkedEntityGroupBufferLookup = linkedEntityGroupBufferLookup
+            };
 
-                        if (SystemAPI.HasComponent<Owner>(entity))
-                        {
-                            var owner = SystemAPI.GetComponent<Owner>(entity);
-                            var unitBuffer = SystemAPI.GetBuffer<UnitBuffer>(owner.Value);
-                            var index = FindUnitIndex(unitBuffer, entity);
-                            unitBuffer.RemoveAt(index);
-                        }
-
-                        commandBuffer.DestroyEntity(index++, entity);
-
-                        var linkEntityGroupBuffer = SystemAPI.GetBuffer<LinkedEntityGroup>(entity);
-                        foreach (var linkEntityGroup in linkEntityGroupBuffer)
-                        {
-                            commandBuffer.DestroyEntity(index++, linkEntityGroup.Value);
-                        }
-                        break;
-                    }
-                }
-                damageBuffer.Clear();
-            }
-        }
-
-        private int FindUnitIndex(in DynamicBuffer<UnitBuffer> unitBuffer, in Entity entity)
-        {
-            for (var i = 0; i < unitBuffer.Length; i++)
-            {
-                if (unitBuffer[i].Value == entity)
-                    return i;
-            }
-
-            throw new InvalidOperationException("Entity is not in unit buffer.");
+            job.Schedule();
         }
     }
 }

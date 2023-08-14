@@ -1,48 +1,72 @@
-﻿using Unity.Entities;
+﻿using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
 namespace BattleSimulator
 {
+    [BurstCompile]
+    [UpdateAfter(typeof(UpdateTargetPositionSystem))]
     public partial struct AttackSystem : ISystem
     {
-        private int sortKey;
+        [BurstCompile]
+        [StructLayout(LayoutKind.Auto)]
+        private partial struct AttackJob : IJobEntity
+        {
+            public EntityCommandBuffer.ParallelWriter CommandBuffer;
+            [ReadOnly] public EntityStorageInfoLookup EntityStorageInfoLookup;
+            public float DeltaTime;
 
+            [BurstCompile]
+            public void Execute([ChunkIndexInQuery] int sortKey, in Target target, in LocalTransform transform, ref Attack attack)
+            {
+                if (attack.CooldownTimer > 0f)
+                    attack.CooldownTimer -= DeltaTime;
+
+                if (attack.CooldownTimer > 0f)
+                    return;
+
+                if (target.Entity == Entity.Null || !EntityStorageInfoLookup.Exists(target.Entity))
+                    return;
+
+                var sqrDistance = math.distancesq(transform.Position, target.Position);
+                if (sqrDistance > attack.Range * attack.Range)
+                    return;
+
+                var damage = new DamageBuffer { Value = attack.Damage };
+                CommandBuffer.AppendToBuffer(sortKey, target.Entity, damage);
+
+                attack.CooldownTimer = attack.CooldownTime;
+            }
+        }
+
+        private EntityStorageInfoLookup entityStorageInfoLookup;
+
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<InGameStateTag>();
+            entityStorageInfoLookup = SystemAPI.GetEntityStorageInfoLookup();
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            entityStorageInfoLookup.Update(ref state);
+
             var commandBufferSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             var commandBuffer = commandBufferSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-            foreach (var (target, transform, attack) in SystemAPI.Query<RefRO<Target>, RefRO<LocalTransform>, RefRW<Attack>>())
+            var job = new AttackJob
             {
-                if (target.ValueRO.Entity == Entity.Null || !SystemAPI.Exists(target.ValueRO.Entity))
-                    continue;
+                CommandBuffer = commandBuffer,
+                EntityStorageInfoLookup = entityStorageInfoLookup,
+                DeltaTime = SystemAPI.Time.DeltaTime
+            };
 
-                var targetTransform = SystemAPI.GetComponent<LocalTransform>(target.ValueRO.Entity);
-
-                var sqrDistance = math.distancesq(transform.ValueRO.Position, targetTransform.Position);
-                if (sqrDistance > attack.ValueRO.Range * attack.ValueRO.Range)
-                {
-                    continue;
-                }
-
-                attack.ValueRW.CooldownTimer += SystemAPI.Time.DeltaTime;
-
-                if (attack.ValueRO.CooldownTimer < attack.ValueRO.CooldownTime)
-                {
-                    continue;
-                }
-
-                attack.ValueRW.CooldownTimer = 0f;
-
-                var damage = new DamageBuffer { Value = attack.ValueRO.Damage };
-                commandBuffer.AppendToBuffer(sortKey++, target.ValueRO.Entity, damage);
-            }
+            job.ScheduleParallel();
         }
     }
 }

@@ -1,46 +1,73 @@
-﻿using Unity.Collections;
+﻿using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace BattleSimulator
 {
+    [BurstCompile]
     public partial struct FindRandomTargetSystem : ISystem
     {
-        private uint randomIndex;
-        
-        public void OnCreate(ref SystemState state)
+        [BurstCompile]
+        [StructLayout(LayoutKind.Auto)]
+        private partial struct FindRandomTargetJob : IJobEntity
         {
-            state.RequireForUpdate<InGameStateTag>();
-        }
+            [ReadOnly] public EntityStorageInfoLookup EntityStorageInfoLookup;
+            [ReadOnly] public NativeArray<Entity> Player1TargetUnits;
+            [ReadOnly] public NativeArray<Entity> Player2TargetUnits;
 
-        public void OnUpdate(ref SystemState state)
-        {
-            foreach (var (target, player, entity) in SystemAPI.Query<RefRW<Target>, RefRO<Player>>().WithEntityAccess())
+            [BurstCompile]
+            public void Execute([EntityIndexInQuery] int sortKey, ref Target target, in Player player, in Entity entity)
             {
-                if (target.ValueRO.Entity != Entity.Null && SystemAPI.Exists(target.ValueRO.Entity))
-                    continue;
+                if (target.Entity != Entity.Null && EntityStorageInfoLookup.Exists(target.Entity))
+                    return;
 
-                var query = player.ValueRO.Id switch
+                var entities = player.Id switch
                 {
-                    1 => SystemAPI.QueryBuilder().WithAll<Player>().WithAbsent<Player1Tag>().Build(),
-                    2 => SystemAPI.QueryBuilder().WithAll<Player>().WithAbsent<Player2Tag>().Build(),
-                    _ => throw new System.NotSupportedException($"Player id {player.ValueRO.Id} is not currently supported. [{entity}]"),
+                    1 => Player1TargetUnits,
+                    2 => Player2TargetUnits,
+                    _ => throw new System.NotSupportedException($"Player id {player.Id} is not currently supported. [{entity}]"),
                 };
 
-                var entities = query.ToEntityArray(Allocator.Temp);
                 if (entities.Length == 0)
                 {
                     UnityEngine.Debug.Log($"{entity} get no target.");
-                    continue;
+                    return;
                 }
 
                 var length = entities.Length;
-                var random = Random.CreateFromIndex(randomIndex++);
 
+                var random = Random.CreateFromIndex((uint)sortKey);
                 var index = random.NextInt(0, length);
-                target.ValueRW.Entity = entities[index];
-                target.ValueRW.Position = SystemAPI.GetComponent<LocalTransform>(entities[index]).Position;
+                target.Entity = entities[index];
             }
+        }
+
+        private EntityStorageInfoLookup entityStorageInfoLookup;
+
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<InGameStateTag>();
+            entityStorageInfoLookup = SystemAPI.GetEntityStorageInfoLookup();
+        }
+
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
+        {
+            entityStorageInfoLookup.Update(ref state);
+            var player1TargetUnits = SystemAPI.QueryBuilder().WithAll<Player>().WithAbsent<Player1Tag>().Build().ToEntityArray(Allocator.TempJob);
+            var player2TargetUnits = SystemAPI.QueryBuilder().WithAll<Player>().WithAbsent<Player2Tag>().Build().ToEntityArray(Allocator.TempJob);
+
+            var job = new FindRandomTargetJob
+            {
+                EntityStorageInfoLookup = entityStorageInfoLookup,
+                Player1TargetUnits = player1TargetUnits,
+                Player2TargetUnits = player2TargetUnits
+            };
+
+            job.ScheduleParallel();
         }
     }
 }
