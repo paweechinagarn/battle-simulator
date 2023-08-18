@@ -67,7 +67,9 @@ namespace BattleSimulator
                 Player2TargetUnits = player2TargetUnits
             };
 
-            job.ScheduleParallel();
+            state.Dependency = job.ScheduleParallel(state.Dependency);
+            player1TargetUnits.Dispose(state.Dependency);
+            player2TargetUnits.Dispose(state.Dependency);
         }
     }
 }

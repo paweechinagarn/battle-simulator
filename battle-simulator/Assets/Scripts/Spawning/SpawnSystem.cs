@@ -144,6 +144,8 @@ namespace BattleSimulator
                     }
                     unitBuffer.RemoveRange(team.Units.Length, unitBuffer.Length - team.Units.Length);
                 }
+
+                spawnGridArray.Dispose();
             }
         }
 
